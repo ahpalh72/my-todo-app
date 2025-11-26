@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Abdul Hakeem Todo App</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <style>
+    body{font-family:'Segoe UI',sans-serif;background:#0d1117;color:#c9d1d9;margin:0;padding:20px}
+    .c{max-width:520px;margin:30px auto;background:#161b22;padding:30px;border-radius:16px;border:1px solid #30363d;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+    h1{text-align:center;color:#58a6ff;margin:0 0 20px;font-size:28px}
+    .h{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .s{font-size:14px;color:#8b949e}
+    input{padding:14px;font-size:16px;width:68%;border-radius:10px;border:1px solid #30363d;background:#0d1117;color:white}
+    button{padding:14px 24px;background:#238636;color:white;border:none;border-radius:10px;cursor:pointer;font-weight:bold}
+    button:hover{background:#2ea043}
+    .f{margin:20px 0;display:flex;gap:10px;justify-content:center}
+    .fb{padding:8px 16px;border-radius:8px;background:#21262d;border:none;color:#c9d1d9;cursor:pointer}
+    .fb.active{background:#1f6feb;color:white}
+    ul{list-style:none;padding:0;margin:0}
+    li{background:#21262d;margin:10px 0;padding:16px;border-radius:10px;display:flex;justify-content:space-between;align-items:center}
+    li.c{opacity:0.6;text-decoration:line-through;background:#1a2e1a}
+    .a button{background:none;border:none;color:#f85149;cursor:pointer;font-size:18px}
+    .cl{margin-top:20px;background:#f85149;padding:12px;width:100%;border-radius:10px}
+    .cl:hover{background:#da3633}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    function App() {
+      const [todos, setTodos] = useState([]);
+      const [input, setInput] = useState("");
+      const [filter, setFilter] = useState("all");
+      useEffect(() => { const s = localStorage.getItem("todos"); if(s) setTodos(JSON.parse(s)); }, []);
+      useEffect(() => { localStorage.setItem("todos", JSON.stringify(todos)); }, [todos]);
+      const add = () => { if(input.trim()){ setTodos([...todos, {id:Date.now(), text:input, completed:false}]); setInput(""); }};
+      const tog = (id) => setTodos(todos.map(t=>t.id===id?{...t,completed:!t.completed}:t));
+      const del = (id) => setTodos(todos.filter(t=>t.id!==id));
+      const clear = () => setTodos(todos.filter(t=>!t.completed));
+      const fTodos = todos.filter(t=>{ if(filter==="active")return!t.completed; if(filter==="completed")return t.completed; return true;});
+      const act = todos.filter(t=>!t.completed).length;
+      return (
+        <div className="c">
+          <div className="h"><h1>Abdul Hakeem Todo</h1><div className="s">{act} active</div></div>
+          <div style={{display:'flex',gap:'10px',marginBottom:'20px'}}>
+            <input value={input} onChange={e=>setInput(e.target.value)} onKeyPress={e=>e.key==='Enter'&&add()} placeholder="What needs to be done?" />
+            <button onClick={add}>Add</button>
+          </div>
+          <div className="f">
+            <button className={`fb ${filter==='all'?'active':''}`} onClick={()=>setFilter('all')}>All</button>
+            <button className={`fb ${filter==='active'?'active':''}`} onClick={()=>setFilter('active')}>Active</button>
+            <button className={`fb ${filter==='completed'?'active':''}`} onClick={()=>setFilter('completed')}>Completed</button>
+          </div>
+          <ul>{fTodos.map(t=><li key={t.id} className={t.completed?'c':''}>
+            <span onClick={()=>tog(t.id)} style={{cursor:'pointer',flex:1}}>{t.text}</span>
+            <div className="a"><button onClick={()=>del(t.id)}>X</button></div>
+          </li>)}</ul>
+          {todos.some(t=>t.completed) && <button className="cl" onClick={clear}>Clear Completed</button>}
+          {todos.length===0 && <p style={{textAlign:'center',opacity:0.6,marginTop:'30px'}}>No tasks yet. Add one!</p>}
+        </div>
+      );
+    }
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
